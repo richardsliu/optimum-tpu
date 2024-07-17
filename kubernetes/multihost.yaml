@@ -33,6 +33,12 @@ spec:
           - "604800"
         ports:
         - containerPort: 8471
+        env:
+        - name: HF_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: huggingface
+              key: token.txt
         resources:
           limits:
             cpu: "8"
