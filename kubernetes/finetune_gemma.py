@@ -22,13 +22,19 @@ model_id = "google/gemma-2b"
 
 fsdp_v2.use_fsdp_v2()
 
+print("----0----")
+
 dataset = load_dataset("databricks/databricks-dolly-15k", split="train")
 
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 data = dataset.map(preprocess_function, remove_columns=list(dataset.features))
 
+print("----1----")
+
 model = AutoModelForCausalLM.from_pretrained(model_id, use_cache=False)
+
+print("----2----")
 
 # Set up PEFT LoRA for fine-tuning.
 lora_config = LoraConfig(
@@ -36,6 +42,8 @@ lora_config = LoraConfig(
     target_modules=["k_proj", "v_proj"],
     task_type="CAUSAL_LM",
 )
+
+print("----3----")
 
 # Set up the FSDP arguments
 fsdp_training_args = fsdp_v2.get_fsdp_training_args(model)
@@ -59,5 +67,7 @@ trainer = SFTTrainer(
     max_seq_length=1024,
     packing=True,
 )
+
+print("----4----")
 
 trainer.train()
