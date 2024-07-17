@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tpu-worker-svc
+  labels:
+    app: tpu-worker
+spec:
+  clusterIP: None
+  selector:
+    app: tpu-worker
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: multi-optimum-tpu
+spec:
+  backoffLimit: 0
+  completions: 2
+  parallelism: 2
+  completionMode: Indexed
+  template:
+    metadata:
+      labels:
+        app: tpu-worker
+    spec:
+      subdomain: tpu-worker-svc
+      restartPolicy: Never
+      containers:
+      - name: optimum-tpu
+        image: gcr.io/tpu-vm-gke-testing/ricliu-optimum-tpu:20240716
+        command:
+          - "sleep"
+          - "604800"
+        ports:
+        - containerPort: 8471
+        resources:
+          limits:
+            cpu: "8"
+            ephemeral-storage: 30Gi
+            google.com/tpu: "4"
+            memory: 200G
+          requests:
+            cpu: "8"
+            ephemeral-storage: 30Gi
+            google.com/tpu: "4"
+            memory: 200G
+      nodeSelector:
+        cloud.google.com/gke-tpu-accelerator: tpu-v4-podslice
+        cloud.google.com/gke-tpu-topology: 2x2x2
+        iam.gke.io/gke-metadata-server-enabled: "true"
