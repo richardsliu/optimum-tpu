@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: optimum-tpu
+spec:
+  containers:
+  - name: optimum-tpu
+    image: gcr.io/tpu-vm-gke-testing/ricliu-optimum-tpu:20240719
+    command:
+      - "sleep"
+      - "604800"
+    ports:
+    - containerPort: 80
+    env:
+    - name: HF_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: huggingface
+          key: token.txt
+    resources:
+      limits:
+        cpu: "8"
+        ephemeral-storage: 30Gi
+        google.com/tpu: "8"
+        memory: 200G
+      requests:
+        cpu: "8"
+        ephemeral-storage: 30Gi
+        google.com/tpu: "8"
+        memory: 200G
+  nodeSelector:
+    cloud.google.com/gke-tpu-topology: 2x4
+    cloud.google.com/gke-tpu-accelerator: tpu-v5-lite-podslice
